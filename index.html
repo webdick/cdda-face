@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>cdda捏脸</title>
+		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+		<!-- Vue -->
+		<script src="./common/js/vue.js"></script>
+		<!-- css默认框架 -->
+		<link rel="stylesheet" type="text/css" href="./common/css/flex.min.css"/>
+		<script src="https://libs.baidu.com/jquery/2.1.4/jquery.min.js"></script>
+		<!-- 消息框 -->
+		<script src="common/js/alert.js" type="text/javascript" charset="utf-8"></script>
+		<style type="text/css">
+			html,body{background-color: #fff;}
+		</style>
+	</head>
+	<body>
+		<!-- 容器 -->
+		<div id="app">
+			<div class="flex flex-column" style="background-color: #343A40; padding: 20px;margin: 0 auto; max-width: 600px;">
+				<div class="flex justify-between align-center">
+					<span class="text-white text-center">人物创建</span>
+				</div>
+
+				<div style="margin-top: 20px;" class="flex justify-between align-center">
+					<div style="width: 80px;height: 80px;background-color: #eae4e4;border-radius: 5px;position: relative;">
+						<img :src="'img/'+cFind(idx).path+'/'+img+'.png'" :id="'ss'+idx" v-for="(img,idx) in show" class="show" v-if="cFind(onTab).max&&img!=0">
+					</div>
+					<div class="flex-1 flex" style="height: 80px;background-color: #eae4e4;margin-left: 20px;border-radius: 5px;overflow-x: auto;">
+						<div class="flex flex-column align-center justify-center" style="width:50px;height: 80px;"
+						v-for="(m,i) in preinstall" :key="i" @click="show=m.face">
+							<img :src="m.img" >
+							<span style="font-size: 12px;margin-top: 5px;">{{m.name}}</span>
+						</div>
+					</div>
+					<div class="flex-column align-center justify-center" style="display: flex;" v-show="false">
+						<canvas id="myCanvas" width="32" height="32"
+						style="margin-top: 10px;border: 1px solid #fff;">
+						</canvas>
+						<p class="text-white" style="font-size: 14px; margin-top: 10px;">长按保存</p>
+					</div>
+				</div>
+				<div style="margin-top: 20px;">
+					<div class="flex">
+						<span style="margin: 5px; margin-bottom: 10px;" v-for="(v,i) in classTab"
+						:class="onClass==v.id?'on-class':'classtap'" @click="changeClass(v.id,v.default)" v-cloak>{{v.title}}</span>
+					</div>
+					<div class="flex-1 flex hide-scroll">
+						<div v-for="(tab,index) in getTab" class="tab flex-shrink" :class="{'on-tab':onTab==tab.id}" style="padding: 5px 8px;cursor: pointer;
+							border-radius: 10px 10px 0 0;" @click="changeTab(tab.id)">
+							<span style="font-size: 13px;" v-cloak>{{tab.name}}</span>
+						</div>
+					</div>
+					<div class="flex flex-wrap" style="align-content: flex-start; height: 400px; padding: 10px; border-radius: 10px; background-color: #eae4e4;">
+						<div class="flex flex-1 align-center justify-center" style="padding: 30px;" v-if="!cFind(onTab).max">
+							<span>这里和你的脑子一样空</span>
+						</div>
+						<div class="item flex align-center justify-center" v-if="cFind(onTab).del"
+						@click="selectShow(onTab,0)">
+							<span style="font-size: 13px;">清除</span>
+						</div>
+						<div class="item flex align-center justify-center" :class="{'on-item':show[onTab]==(i+1)}" v-for="(item,i) in cFind(onTab).max"
+						@click="selectShow(onTab,i+1)">
+							<img :src="'img/'+cFind(onTab).path+'/'+(i+1)+'.png'" :width="36*(!cFind(onTab).zoom?1:cFind(onTab).zoom)">
+						</div>
+					</div>
+				</div>
+				<div class="flex justify-between align-center" style="margin-top: 10px;">
+					<div class="btn" @click="save()">保存图片</div>
+					<div class="btn" @click="menu=!menu">导入导出</div>
+					<div class="btn" @click="init()">重置角色</div>
+				</div>
+				<div></div>
+			</div>
+			<!-- 弹窗 -->
+			<div class="flex align-center justify-center" style="height: 100%;width: 100%;position: fixed;top: o;left:0;bottom: 0;right: 0;
+			background-color: rgba(0,0,0,.3); padding: 20px;box-sizing:border-box;" @click="menu=false" v-if="menu">
+				<div class="flex-1" style="background-color: #FFFFFF; padding: 20px;border-radius: 5px;" @click.stop>
+					<p class="text-center">捏脸数据</p>
+					<textarea id="face" ref="face" style="width: 100%;min-height: 100px;margin-top: 20px;">{{faceData}}</textarea>
+					<div class="btn" style="margin: 10px auto 0 auto;" @click="useFace()">使用数据</div>
+				</div>
+			</div>
+		</div>
+		
+	</body>
+	<!-- vue实例 -->
+	
+	<script type="module">
+		import cate from './category.js'
+		
+		var app = new Vue({
+		  el:'#app',
+		  data: {
+			  onTab:1,
+			  onClass:1,
+			  menu:false,
+			  classTab:[
+				  {
+					  id:1,
+					  title:'基本',
+					  default:1
+				  }
+			  ],
+			  show:{1:1},
+			  ss:[
+				  {
+					  "id":1,
+				  	  "name":"底图",//名称
+				  	  "path":"1",//文件夹路径
+				  	  "default":1,//默认选中
+				  	  "max":2,//物品数量
+				  	  "classTab":0,//分类
+				  	  "zoom":1,//显示缩放倍数
+				  	  "del":false//是否允许不穿戴 默认true
+				  }
+			  ],
+			  preinstall:[
+				  {
+					  "name":"倪哥",
+					  "img":"",
+					  "face":{1:2,2:6,3:1,4:3,5:1,6:0,7:1,8:0,9:1,10:0,11:0,12:0,13:0}
+				  }
+			  ]
+		  },
+		  created(){
+			  if(cate.cate){
+				  this.ss = cate.cate
+				  this.classTab = cate.menu
+				  this.preinstall = cate.preinstall
+			  }  
+			  this.init()
+		  },
+		  computed:{
+			  // 查询类别下的二级栏目
+			getTab(){
+			    var arr = []
+			    this.ss.forEach((v,i)=>{
+			  	  if(v.classTab==this.onClass){
+			  		  arr.push(v)
+			  	  }
+			    })
+			    return arr
+			  },
+			faceData(){
+				 return JSON.stringify(this.show).replace(/\s*/g,"")
+			}
+		  },
+		  methods:{
+			  
+			//导出捏脸数据 
+			useFace(){
+				var str = JSON.parse($('#face').val())
+				console.log($('#face').val())
+				if(!str){
+					alert("非法JSON")
+					return false;
+				}
+				this.show = str
+				toast('导入成功')		
+			},
+			faceExport(){
+				alert({
+					title:'导出',
+					content:'导出捏脸数据',
+					doneText:'复制到粘贴板'
+				}).then(()=>{
+					document.execCommand('hey');
+					// JSON.stringify(this.show)
+				})
+			},
+			isJSON(str) {
+			    if (typeof str == 'string') {
+			        try {
+			            var obj=JSON.parse(str);
+			            if(typeof obj == 'object' && obj ){
+			                return true;
+			            }else{
+			                return false;
+			            }
+			
+			        } catch(e) {
+			            console.log('error：'+str+'!!!'+e);
+			            return false;
+			        }
+			    }
+			},
+			init(){
+				var arr = cate.cate
+				var obj = {}
+				arr.forEach((v,i)=>{
+					obj[v.id] = v.default
+				})
+				
+				this.show = obj
+			},
+			// 查询指定ID的栏目
+			cFind(id){
+				return this.ss.find(x=>x.id==id)
+			},
+			changeClass(index,id){
+			  	this.onClass = index
+				this.onTab = id
+			},
+			changeTab(index){
+				this.onTab = index
+			},
+			selectShow(i,val){
+				this.show[i] = val
+			},
+			save(){
+				var c=document.getElementById("myCanvas");
+				var ctx=c.getContext("2d");
+				var obj = this.show
+				Object.getOwnPropertyNames(obj).forEach((key)=>{
+				    if(!this.cFind(key)||obj[key]==0){
+						console.log(this.cFind(key),key)
+				    	return false;
+				    }else{
+				    	var img=document.getElementById("ss"+key);
+				    	ctx.drawImage(img,0,0);
+				    }
+				})
+				console.log(this.show)
+				this.download(c.toDataURL("image/png"));
+				toast('生成成功')
+			},
+			// 另存为图片
+			download(src) {
+			 var $a = $("<a></a>").attr("href", src).attr("download", "img.png");
+			 $a[0].click();
+			}
+		  }
+		  
+		})
+	</script>
+	<style type="text/css">
+		::-webkit-scrollbar{
+		　　display:none;/*ChromeSafari*/
+		}
+		.hide-scroll{scrollbar-width:none;-ms-overflow-style:none;/*IE10+*/margin:0 8px; overflow-x: auto;}
+		.tab{background-color: #7c7c7c; color: #FFFFFF;margin:0 3px;}
+		.on-tab{background-color: #eae4e4; color: #333;}
+		.item{width: 48px;height: 48px;background-color: #FFFFFF;border-radius: 5px;margin: 5px;border: 2px solid #fff;}
+		.on-item{width: 48px;height: 48px;background-color: #FFFFFF;border-radius: 5px;margin: 5px;border: 2px solid #e1c018;}
+		.show{
+			position: absolute; left: 50%; top: 50%;transform: translate(-50%, -50%); width: 60%; height: 60%;
+		}
+		.btn{color: #fff; text-align: center; padding: 5px;font-size: 13px; border-radius: 5px; width: 100px; background-color: #0062CC;font-size: 14px; padding: 6px 0px;margin: 5px 10px 0 10px;cursor: pointer;}
+		.classtap{color: #FFFFFF;;padding: 5px 10px;border-radius: 20px;cursor: pointer;}
+		.on-class{background-color: #FFFFFF;color: #333;padding: 5px 10px;border-radius: 20px;cursor: pointer;}
+	</style>
+</html>

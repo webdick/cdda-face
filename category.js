@@ -1,120 +1,150 @@
+// 数据文件 切记 同一数组的数据ID不可重复
 // 顶级菜单
 let menu = [
 	{
+	  id:1,
 	  title:'基本',
-	  default:0
+	  default:1
 	},{
+	  id:2,
 	  title:'服装',
-	  default:4
+	  default:5
 	},{
+	  id:3,
 	  title:'装备',
-	  default:9
+	  default:10
 	},{
+	  id:4,
 	  title:'武器',
-	  default:12
+	  default:13
 	}
 ]
 // 二级栏目
 let cate = [
   {
+	  "id":1,
 	  "name":"底图",//名称
 	  "path":"1",//文件夹路径
 	  "default":1,//默认选中
 	  "max":2,//物品数量
-	  "classTab":0,//分类
+	  "classTab":1,//分类ID
 	  "zoom":1,//显示缩放倍数
 	  "del":false//是否允许不穿戴 默认true
   },{
+	  "id":2,
 	  "name":"皮肤",
 	  "path":"2",
 	  "default":1,
 	  "max":6,
-	  "classTab":0,
+	  "classTab":1,
 	  "del":false
   },{
+	  "id":3,
 	  "name":"眼睛",
 	  "path":"3",
 	  "default":1,
 	  "max":14,
-	  "classTab":0,
+	  "classTab":1,
 	  "zoom":3,
 	  "del":false
   },{
+	  "id":4,
 	  "name":"发型",
 	  "path":"4",
 	  "default":1,
 	  "max":4,
-	  "classTab":0,
+	  "classTab":1,
 	  "del":false
   },{
+	  "id":5,
 	  "name":"衣服",
 	  "path":"衣服",
 	  "default":0,
 	  "max":4,
-	  "classTab":1,
+	  "classTab":2,
 	  "del":true
   },{
+	  "id":6,
 	  "name":"外套",
 	  "path":"外套",
 	  "default":0,
 	  "max":14,
-	  "classTab":1,
+	  "classTab":2,
 	  "del":true
   },{
+	  "id":7,
 	  "name":"鞋子",
 	  "path":"鞋子",
 	  "default":0,
 	  "max":15,
-	  "classTab":1,
+	  "classTab":2,
 	  "del":true
   },{
+	  "id":8,
 	  "name":"手臂",
 	  "path":"手臂",
 	  "default":0,
 	  "max":2,
-	  "classTab":1,
+	  "classTab":2,
 	  "del":true
   },{
+	  "id":9,
 	  "name":"裤子",
 	  "path":"裤子",
 	  "default":0,
 	  "max":2,
-	  "classTab":1,
+	  "classTab":2,
 	  "del":true
   },{
+	  "id":10,
 	  "name":"背心胸挂",
 	  "path":"背心胸挂",
 	  "default":0,
 	  "max":6,
-	  "classTab":2,
+	  "classTab":3,
 	  "del":true
   },{
+	  "id":11,
 	  "name":"动力装甲(身体)",
 	  "path":"动力装甲",
 	  "default":0,
 	  "max":4,
-	  "classTab":2,
+	  "classTab":3,
 	  "del":true
   },{
+	  "id":12,
 	  "name":"动力装甲(头部)",
 	  "path":"动力装甲(头部)",
 	  "default":0,
 	  "max":4,
-	  "classTab":2,
+	  "classTab":3,
 	  "del":true
   },{
+	  "id":13,
 	  "name":"近战武器",
 	  "path":"近战武器",
 	  "default":0,
 	  "max":25,
-	  "classTab":3,
+	  "classTab":4,
 	  "del":true
   }
 ];
-// 物品
-
+// 人物预设
+let preinstall = [
+  {
+	  "name":"倪哥",
+	  "img":"img/face/1.png",
+	  "face":{1:2,2:6,3:1,4:3,5:1,6:0,7:1,8:0,9:1,10:0,11:0,12:0,13:0}
+  },
+  {
+	  "name":"猎马人",
+	  "img":"img/face/2.png",
+	  "face":{1:1,2:1,3:1,4:4,5:0,6:12,7:0,8:0,9:2,10:2,11:0,12:0,13:15}
+  }
+]
 
 export default{
 	menu:menu,
 	cate:cate,
+	preinstall:preinstall
 }
